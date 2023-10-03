@@ -82,7 +82,7 @@ exports.register_user = async (req, res) => {
         const { error } = SignupSchema.validate(req.body);
         if (error) {
             return res.status(400).json({
-                result: error.details[0],
+                result: error.details[0].message,
                 success: false,
             });
         }
