@@ -6,6 +6,11 @@ const secretKey = 'ahmedsecret';
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
+
+const generateJwtToken = (user) => {
+    const token = jwt.sign({ user }, secretKey, { expiresIn: '2h' });
+    return token;
+};
 const securePassword = async (password) => {
     try {
         const passwordHash = await bcrypt.hash(password, 10);
@@ -34,7 +39,7 @@ exports.login_user = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ result: 'Invalid password', success: false });
         }
-
+        const token = generateJwtToken(user);
         // Check if user has already been assigned weeks
         if (!user.assignedWeeks || user.assignedWeeks.length === 0) {
             const allWeeks = await weekModel.find({});
@@ -49,9 +54,9 @@ exports.login_user = async (req, res) => {
                 };
             });
             await user.save();
-            res.json({ token, user: userWithoutPassword, result: 'Weeks assigned successfully', success: true });
+            res.json({ token,  result: 'Weeks assigned successfully', success: true });
         } else {
-            res.json({ token, user: userWithoutPassword, result: 'User already has assigned weeks', success: true });
+            res.json({ token, result: 'User already has assigned weeks', success: true });
         }
     } catch (error) {
         console.error(error);
