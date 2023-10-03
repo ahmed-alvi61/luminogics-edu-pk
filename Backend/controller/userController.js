@@ -72,55 +72,6 @@ exports.login_user = async (req, res) => {
         res.status(500).json({ result: 'Something went wrong', success: false });
     }
 };
-
-
-
-// //Login User
-// exports.login_user = async (req, res) => {
-//     const { error } = SignupSchema.validate(req.body);
-//     if (error) {
-//         return res.status(400).json({
-//             result: error.details[0].message,
-//             success: false,
-//         });
-//     }
-//     const { email, password } = req.body;
-//     try {
-//         const user = await userModel.findOne({ email }).select('+password');
-//         if (!user) {
-//             return res.status(404).json({ result: 'No User Found', success: false });
-//         }
-//         const isPasswordValid = await bcrypt.compare(password, user.password);
-//         if (!isPasswordValid) {
-//             return res.status(401).json({ result: 'Invalid password', success: false });
-//         }
-//         const userId = user._id;
-//         const jwtPayload = {
-//             userId: user._id,
-//         };
-//         const token = jwt.sign(jwtPayload, secretKey, { expiresIn: '1h' });
-//         const userWithoutPassword = { ...user.toObject(), password: undefined };
-//         res.json({ token, user: userWithoutPassword, success: true });
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ result: 'Something went wrong', success: false });
-//     }
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //Signup User
 exports.register_user = async (req, res) => {
     try {
@@ -131,7 +82,7 @@ exports.register_user = async (req, res) => {
         const { error } = SignupSchema.validate(req.body);
         if (error) {
             return res.status(400).json({
-                result: error.details[0].message,
+                result: error.details[0],
                 success: false,
             });
         }
