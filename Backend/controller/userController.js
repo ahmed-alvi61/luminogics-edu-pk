@@ -6,11 +6,6 @@ const secretKey = 'ahmedsecret';
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-
-const generateJwtToken = (user) => {
-    const token = jwt.sign({ user }, secretKey, { expiresIn: '2h' });
-    return token;
-};
 const securePassword = async (password) => {
     try {
         const passwordHash = await bcrypt.hash(password, 10);
@@ -20,7 +15,6 @@ const securePassword = async (password) => {
         res.status(500).json({ error: 'An error occurred' });
     }
 }
-//Login User
 exports.login_user = async (req, res) => {
     const { error } = SignupSchema.validate(req.body);
     if (error) {
@@ -39,7 +33,9 @@ exports.login_user = async (req, res) => {
         if (!isPasswordValid) {
             return res.status(401).json({ result: 'Invalid password', success: false });
         }
-        const token = generateJwtToken(user);
+
+        let token;  // Define the token variable
+
         // Check if user has already been assigned weeks
         if (!user.assignedWeeks || user.assignedWeeks.length === 0) {
             const allWeeks = await weekModel.find({});
@@ -53,9 +49,22 @@ exports.login_user = async (req, res) => {
                     },
                 };
             });
+
+            // Generate the token
+            const jwtPayload = {
+                userId: user._id,
+            };
+            token = jwt.sign(jwtPayload, secretKey, { expiresIn: '1h' });
+
             await user.save();
-            res.json({ token,  result: 'Weeks assigned successfully', success: true });
+            res.json({ token, result: 'Weeks assigned successfully', success: true });
         } else {
+            // Generate the token
+            const jwtPayload = {
+                userId: user._id,
+            };
+            token = jwt.sign(jwtPayload, secretKey, { expiresIn: '1h' });
+
             res.json({ token, result: 'User already has assigned weeks', success: true });
         }
     } catch (error) {
@@ -63,6 +72,53 @@ exports.login_user = async (req, res) => {
         res.status(500).json({ result: 'Something went wrong', success: false });
     }
 };
+
+
+
+// //Login User
+// exports.login_user = async (req, res) => {
+//     const { error } = SignupSchema.validate(req.body);
+//     if (error) {
+//         return res.status(400).json({
+//             result: error.details[0].message,
+//             success: false,
+//         });
+//     }
+//     const { email, password } = req.body;
+//     try {
+//         const user = await userModel.findOne({ email }).select('+password');
+//         if (!user) {
+//             return res.status(404).json({ result: 'No User Found', success: false });
+//         }
+//         const isPasswordValid = await bcrypt.compare(password, user.password);
+//         if (!isPasswordValid) {
+//             return res.status(401).json({ result: 'Invalid password', success: false });
+//         }
+//         const userId = user._id;
+//         const jwtPayload = {
+//             userId: user._id,
+//         };
+//         const token = jwt.sign(jwtPayload, secretKey, { expiresIn: '1h' });
+//         const userWithoutPassword = { ...user.toObject(), password: undefined };
+//         res.json({ token, user: userWithoutPassword, success: true });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ result: 'Something went wrong', success: false });
+//     }
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //Signup User
